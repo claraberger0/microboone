@@ -71,6 +71,8 @@ int main(int argc, char** argv) {
   size_t _maxEvts = 1;
   size_t evCtr = 0;
   
+   TCanvas c("c","c",900,500);
+  TH1D horig("roi_original", "roi_original;Tick;ADC",21,5458,5478);
   for (gallery::Event ev(filenames) ; !ev.atEnd(); ev.next()) {
     if(evCtr >= _maxEvts) break;
 
@@ -99,37 +101,39 @@ int main(int argc, char** argv) {
 
       for (auto iROI = zsROIs.begin_range(); iROI != zsROIs.end_range(); ++iROI) {
 	auto ROI = *iROI;
-	const size_t firstTick = ROI.begin_index();
+	//const size_t firstTick = ROI.begin_index();
 	const size_t endTick = ROI.end_index();
-	
-	TH1D horig("roi_original", "roi_original;Tick;ADC", endTick + 1 - firstTick, firstTick, endTick + 1);
+       
+	//	TH1D horig("roi_original", "roi_original;Tick;ADC", endTick + 1 - firstTick, firstTick, endTick + 1);
 	horig.SetLineColor(kBlack);
 
 	for (size_t iTick = ROI.begin_index(); iTick <= ROI.end_index(); iTick++ ){
+	  if( i==3406){
 	    horig.Fill((int)iTick,ROI[iTick]);
-	}
+	    cout<<ROI[endTick];}
+	}	
 	
-        if (i >= 1000 && i <= 1010)
-	  {TCanvas c(Form("c_%d_U",i),Form("c%d_U",i),900,500);
-	    horig.Draw("hist ][");
-	    c.Modified();
-	    c.Update();
-	    c.Print(".png");}
-        else if (i >= 3400 && i <= 3410)
-	  {TCanvas c(Form("c_%d_V",i),Form("c%d_V",i),900,500);
-	    horig.Draw("hist ][");
-	    c.Modified();
-	    c.Update();
-	    c.Print(".png");}
-        else if (i >= 6800 && i <= 6810)
-	  {TCanvas c(Form("c_%d_Y",i),Form("c%d_Y",i),900,500);
-	    horig.Draw("hist ]");
-	    c.Modified();
-	    c.Update();
-	    c.Print(".png");}
+        //if ( i >= 1000 && i <= 1030)
+	//{TCanvas c(Form("c_%d_U",i),Form("c%d_U",i),900,500);
+	//  horig.Draw("hist ][");
+	//  c.Modified();
+	//  c.Update();
+	//  c.Print(".png");}
+        //if (i >=3408 && i<=3410){
+	//TCanvas c(Form("c_%d_V",i),Form("c%d_V",i),900,500);
+	//horig.Draw("hist ][");
+	 //c.Modified();
+	 //c.Update();
+	//c.Print(".png");}
+	// else if (i >= 6800 && i <= 6810)
+	//{TCanvas c(Form("c_%d_Y",i),Form("c%d_Y",i),900,500);
+	//  horig.Draw("hist ]");
+	//  c.Modified();
+	//  c.Update();
+	//  c.Print(".png");}
 
       
-      }
+	}
     }
     f_output.cd();
  
@@ -137,8 +141,10 @@ int main(int argc, char** argv) {
     duration<double,std::milli> time_total_ms(t_end-t_begin);
     cout << "\tEvent took " << time_total_ms.count() << " ms to process." << endl;
     evCtr++;
-  } //end loop over events!                                                                                                                                  
+  } //end loop over events!
 
+    horig.Draw("hist ][");                             
+    c.Write();
   //and ... write to file!                                                                                                                                   
   f_output.Write();
   f_output.Close();
