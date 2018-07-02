@@ -68,11 +68,9 @@ int main(int argc, char** argv) {
   //                                                                                                                         
   //In a for loop, that looks like this:                                                                                 
 
-  size_t _maxEvts = 2;
+  size_t _maxEvts = 1;
   size_t evCtr = 0;
   
-  // TCanvas c("c","c",900,500);
-  //TH1D horig("roi_original", "roi_original;Tick;ADC",21,5458,5478);
   for (gallery::Event ev(filenames) ; !ev.atEnd(); ev.next()) {
     if(evCtr >= _maxEvts) break;
 
@@ -98,159 +96,49 @@ int main(int argc, char** argv) {
     
     for (unsigned int i=0; i<wire_vec.size();i++){
       auto zsROIs = wire_vec[i].SignalROI();
-      int channel = wire_vec[i].Channel();
-      
+
       for (auto iROI = zsROIs.begin_range(); iROI != zsROIs.end_range(); ++iROI) {
 	auto ROI = *iROI;
-	const int firstTick = ROI.begin_index();
+	const size_t firstTick = ROI.begin_index();
 	const size_t endTick = ROI.end_index();
-       
-
-	//	TH1D horig("roi_original", "roi_original;Tick;ADC", endTick + 1 - firstTick, firstTick, endTick + 1);
-	//horig.SetLineColor(kBlack);
-     
-
-	//for (size_t iTick = ROI.begin_index(); iTick <= ROI.end_index(); iTick++ ){  
-	//horig.Fill((int)iTick,ROI[iTick]);}
 	
-	double firstpost;
-	if(ROI[endTick]>1){   // not counting when the last tick is 0 or very small                                        
-          firstpost = ROI[firstTick+7]-ROI[endTick];
-	  TH1D horig("roi_original", "roi_original;Tick;ADC", endTick + 1 - firstTick, firstTick, endTick + 1);
-	  horig.SetLineColor(kBlack);
-          for (size_t iTick = ROI.begin_index(); iTick <= ROI.end_index(); iTick++ ){  //fill up to endTick                
-	    horig.Fill((int)iTick,ROI[iTick]);}
-	  if (channel >3400 && channel <=3420 && firstpost<0){
-	    TCanvas c(Form("c_%d_%d_V_neg",channel,firstTick),Form("c%d_Y",channel),900,500);
-	    horig.Draw("hist ]");
-	    c.Modified();
-	    c.Update();
-	    cout<<"event:"<<event<<' '<<"channel:"<<channel<<' '<<firstTick<<" to "<<endTick<<' '<<ROI[firstTick+7]<<"-"<<ROI[endTick]<<"="<<firstpost<<"\n";
-	    c.Print(".png");
-	  }
-	  if (channel >3400 && channel <=3410 && firstpost>0){
-	    TCanvas c(Form("c_%d_%d_V_pos",channel,firstTick),Form("c%d_Y",channel),900,500);
-	    horig.Draw("hist ]");
-	    c.Modified();
-	    c.Update();
-	    cout<<"event:"<<event<<' '<<"channel:"<<channel<<' '<<firstTick<<" to "<<endTick<<' '<<ROI[firstTick+7]<<"-"<<ROI[endTick]<<"="<<firstpost<<"\n";
-	    c.Print(".png");
-	  }
+	TH1D horig("roi_original", "roi_original;Tick;ADC", endTick + 1 - firstTick, firstTick, endTick + 1);
+	horig.SetLineColor(kBlack);
+
+	for (size_t iTick = ROI.begin_index(); iTick <= ROI.end_index(); iTick++ ){
+	    horig.Fill((int)iTick,ROI[iTick]);
 	}
-
-        else                                                                                                              
-          {firstpost = ROI[firstTick+7]-ROI[endTick-1];
-	   TH1D horig("roi_original", "roi_original;Tick;ADC", endTick  - firstTick, firstTick, endTick);
-	   horig.SetLineColor(kBlack);
-	  for (size_t iTick = ROI.begin_index(); iTick < ROI.end_index(); iTick++ ){  // fill up to endTick-1            
-	      horig.Fill((int)iTick,ROI[iTick]);}
-	  if (channel >3400 && channel <=3420 && firstpost<0){
-	    TCanvas c(Form("c_%d_%d_V_neg",channel,firstTick),Form("c%d_Y",channel),900,500);
-	    horig.Draw("hist ]");
-	    c.Modified();
-	    c.Update();
-	    cout<<"event:"<<event<<' '<<"channel:"<<channel<<' '<<firstTick<<" to "<<endTick<<' '<<ROI[firstTick+7]<<"-"<<ROI[endTick-1]<<"="<<firstpost<<"\n";
-	    c.Print(".png");
-          }
-	  if (channel >3400 && channel <=3410 && firstpost>0){
-	    TCanvas c(Form("c_%d_%d_V_pos",channel,firstTick),Form("c%d_Y",channel),900,500);
-	    horig.Draw("hist ]");
-	    c.Modified();
-	    c.Update();
-	    cout<<"event:"<<event<<' '<<"channel:"<<channel<<' '<<firstTick<<" to "<<endTick<<' '<<ROI[firstTick+7]<<"-"<<ROI[endTick-1]<<"="<<firstpost<<"\n";
-	    c.Print(".png");
-	  }
-	  }
-
-	// first sample passing the threshold - last post sample when  the difference is negative in the V plane    	
-	//if (channel >3400 && channel <=3420 && firstpost<0){
-	// TCanvas c(Form("c_%d_%d_V_neg",channel,firstTick),Form("c%d_Y",channel),900,500);
-	//horig.Draw("hist ]");
-	//c.Modified();
-	//c.Update();
-	//cout<<"event:"<<event<<' '<<"channel:"<<channel<<' '<<firstTick<<" to "<<endTick<<' '<<ROI[firstTick+7]<<"-"<<ROI[endTick]<<"="<<firstpost<<"\n";
-	//c.Print(".png");
-	//}	
-	//if (channel >3400 && channel <=3410 && firstpost>0){
-	//TCanvas c(Form("c_%d_%d_V_pos",channel,firstTick),Form("c%d_Y",channel),900,500);
-	//horig.Draw("hist ]");
-	// c.Modified();
-	//c.Update();
-	//cout<<"event:"<<event<<' '<<"channel:"<<channel<<' '<<firstTick<<" to "<<endTick<<' '<<ROI[firstTick+7]<<"-"<<ROI[endTick]<<"="<<firstpost<<"\n";
-	//c.Print(".png");
-        //}
-
-	// look at waveforms where the difference between the first passing sample and the last post sample is 0
-	//double firstpost; //fist sample passing threshold - the last post sample 
-	//if(ROI[endTick]>1){   // not counting when the last tick is 0 or very small
-	  //firstpost = ROI[firstTick+7]-ROI[endTick];
-	  //for (size_t iTick = ROI.begin_index(); iTick <= ROI.end_index(); iTick++ ){  //fill up to endTick
-	    //  horig.Fill((int)iTick,ROI[iTick]);}}
-	//else
-	  //{firstpost = ROI[firstTick+7]-ROI[endTick-1];
-	    //for (size_t iTick = ROI.begin_index(); iTick < ROI.end_index(); iTick++ ){  // fill up to endTick-1 
-	      //    horig.Fill((int)iTick,ROI[iTick]);}}
-      	
-	//if(firstpost<1 && firstpost>=0){    // when this differece is 0,
-	//  cout<<"event:"<<event<<' '<<"channel:"<<channel<<' '<<firstTick<<' to  '<<endTick<<' '<<ROI[firstTick+7]<<"-"<<ROI[endTick]<<"="<<firstpost<<"\n";
-	// TCanvas c(Form("c_%d_%d_Y",channel,firstTick),Form("c%d_Y",channel),900,500);                             
-	// horig.Draw("hist ]");
-	// c.Modified();
-	// c.Update();
-	// c.Print(".png"); // print that waveform
-	//}
-
-
-	//	if(channel==5644)
-	//{TCanvas c(Form("c_%d_%d_Y",channel,firstTick),Form("c%d_Y",channel),900,500);
-	    //	    cout<<ROI[endTick]<<;
-	//  horig.Draw("hist ]");
-	//  c.Modified();
-	//  c.Update();
-	    // c.Print(".png");
-	//}
-
-	//        if ( channel >= 1010 && channel <= 1020)// just a random sample of U plane to look at
-	//{ TCanvas c(Form("c_%d_U",channel),Form("c%d_U",channel),900,500);
-	// horig.Draw("hist ][");
-	//c.Modified();
-	//c.Update();
-	//f_output.cd();
-	//c.Write();
-	  //	  cout<<ROI[endTick]<<' '<< channel <<'\n';
-	//}
-        //else if (channel >=3400 && channel<=3410){
-	//TCanvas c(Form("c_%d_V",channel),Form("c%d_V",channel),900,500);
-	// horig.Draw("hist ][");
-	//c.Modified();
-	//c.Update();
-	//f_output.cd();
-	//c.Write();
-	 //cout<<ROI[endTick]<<' '<<channel<<'\n';
-	//}
-	//else if (channel >= 6800 && channel <= 6810)
-	   //{ TCanvas c(Form("c_%d_Y",channel),Form("c%d_Y",channel),900,500);
-	//horig.Draw("hist ]");
-	//c.Modified();
-	//c.Update();
-	//f_output.cd();
-	//c.Write();
-	  //cout<<ROI[endTick]<<' '<<channel<<'\n';
-	//}
 	
+        if (i >= 1000 && i <= 1010)
+	  {TCanvas c(Form("c_%d_U",i),Form("c%d_U",i),900,500);
+	    horig.Draw("hist ][");
+	    c.Modified();
+	    c.Update();
+	    c.Print(".png");}
+        else if (i >= 3400 && i <= 3410)
+	  {TCanvas c(Form("c_%d_V",i),Form("c%d_V",i),900,500);
+	    horig.Draw("hist ][");
+	    c.Modified();
+	    c.Update();
+	    c.Print(".png");}
+        else if (i >= 6800 && i <= 6810)
+	  {TCanvas c(Form("c_%d_Y",i),Form("c%d_Y",i),900,500);
+	    horig.Draw("hist ]");
+	    c.Modified();
+	    c.Update();
+	    c.Print(".png");}
+
+      
       }
     }
-    // f_output.cd();
+    f_output.cd();
  
     auto t_end = high_resolution_clock::now();
     duration<double,std::milli> time_total_ms(t_end-t_begin);
     cout << "\tEvent took " << time_total_ms.count() << " ms to process." << endl;
     evCtr++;
-  } //end loop over events!
+  } //end loop over events!                                                                                                                                  
 
-  //  horig.Draw("hist ][");                             
-  // c.Write();
-  
   //and ... write to file!                                                                                                                                   
   f_output.Write();
   f_output.Close();

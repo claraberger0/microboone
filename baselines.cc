@@ -33,6 +33,7 @@
 //"larsoft" object includes                                                               
 #include "lardataobj/RecoBase/Wire.h"
 
+
 //convenient for us! let's not bother with art and std namespaces!                        
 using namespace art;
 using namespace std;
@@ -69,6 +70,7 @@ int main(int argc, char** argv) {
   TCanvas c4("c_first","c4",600,900);
   c4.Divide(1,3);
 
+  
   TH1I hFirstPreU("hFirstPreu","First sample passing U threshold - first presample ADC; ADC; Frequency",400,-200,200);
   TH1I hFirstPreV("hFirstPrev","First sample passing V threshold - first presample ADC; ADC; Frequency",400,-200,200);
   TH1I hFirstPreY("hFirstPrey","First sample passing Y threshold - first presample ADC; ADC; Frequency",400,-200,200);
@@ -110,14 +112,16 @@ int main(int argc, char** argv) {
   TH2I hLastAlgo("hLastAlgo","Last sample passing threshold - algorithm baseline ADC; Channel; ADC;", 8256, 0, 8256, 400,-200,200);
 
 
+  //channels in V that have negative first samples passing the threshold
+  TCanvas c10("c_neg","c10",900,600);
+  TH1I hFirstNegV("hFirstNegV","V Channels where the first sample passing the threshold-last post sample is negative; Channel; Frequency",2400,2401,4800);
 
+  // to find the ratio between the positive and negative peaks of the Vplane threshold
+  double counterpos=0;
+  double counterneg=0;
 
-  // TCanvas c6("c6","c6",1100,500);
-  //c6.Divide(3,1);
-  //TH1I  hLastSamplePassingThresholdu("hLastSamplePassingThresholdu", "Last sample passing threshold - last postsample ADC; Channel; ADC", 400, -200, 200);
-  //TH1I  hLastSamplePassingThresholdv("hLastSamplePassingThresholdv", "Last sample passing threshold - last postsample ADC; Channel; ADC", 400, -200, 200);
-  //TH1I  hLastSamplePassingThresholdy("hLastSamplePassingThresholdy", "Last sample passing threshold - last postsample ADC; Channel; ADC", 400,-200, 200);
-
+  size_t  fZSPresamples = 7;
+  size_t  fZSPostsamples = 8;
 
   for (gallery::Event ev(filenames) ; !ev.atEnd(); ev.next()) {
     if(evCtr >= _maxEvts) break;
@@ -143,13 +147,11 @@ int main(int argc, char** argv) {
 
     //cout << "\tThere are " << wire_vec.size() << " Wires in this event." << endl;
     // Event display histogram           
- 
+
+
  for (unsigned int i=0; i<wire_vec.size();i++){
    auto zsROIs = wire_vec[i].SignalROI();
    int channel = wire_vec[i].Channel();
-
-   size_t  fZSPresamples = 7;                                                                            
-   size_t  fZSPostsamples = 8;
 
    //const float maxADCInterpolDiff = 32; // Maximum ADC difference to the interpolation using nearest neigbors to be considered non-flipped bits.
    //size_t ctrROI = 0;
@@ -223,7 +225,7 @@ int main(int argc, char** argv) {
      const float intercept = prebaseline - slope*pretick;
 
     
-     //*******************************************end baseline algorightm*******************************************************
+     //*******************************************end baseline algorightm*************************************************
      
      // first sample passing the threshold                                       
      double firstpre;
@@ -232,12 +234,14 @@ int main(int argc, char** argv) {
      if(channel <= 2400){
        hFirstPreU.Fill(firstpre);}
      else if(channel >2400 && channel <=4800){
-       hFirstPreV.Fill(firstpre);}
+       hFirstPreV.Fill(firstpre);
+       if (firstpre>=0){counterpos += 1;}
+       if (firstpre<0){counterneg += 1;}}
      else
        {hFirstPreY.Fill(firstpre);}
 
      double firstpost;
-     if(ROI[endTick]>0){
+     if(ROI[endTick]>1){
        firstpost = ROI[firstTick+7]-ROI[endTick];}
      else 
        {firstpost = ROI[firstTick+7]-ROI[endTick-1];}
@@ -245,10 +249,15 @@ int main(int argc, char** argv) {
      if(channel <= 2400){
        hFirstPostU.Fill(firstpost);}
      else if(channel >2400 && channel <=4800){
-       hFirstPostV.Fill(firstpost);}
+       hFirstPostV.Fill(firstpost);
+       if(firstpost<0){hFirstNegV.Fill(channel);}
+	 //cout<<"event:"<<event<<' '<<"channel:"<<channel<<' '<<firstTick<<' '<<endTick<<' '<<ROI[firstTick+7]<<"-"<<ROI[endTick]<<"="<<firstpost<<"\n";}
+     }
      else
-       {hFirstPostY.Fill(firstpost);}
-
+       {hFirstPostY.Fill(firstpost);
+	 //if(firstpost<1 && firstpost>=0){ 
+	   //  cout<<"event:"<<event<<' '<<"channel:"<<channel<<' '<<firstTick<<' '<<endTick<<' '<<ROI[firstTick+7]<<"-"<<ROI[endTick]<<"="<<firstpost<<"\n";}
+       }
      double firstalgo;
      firstalgo = ROI[firstTick+7]-(slope*(firstTick+7)+intercept);
      hFirstAlgo.Fill(channel,firstalgo);
@@ -307,7 +316,6 @@ int main(int argc, char** argv) {
 
    }
  }
-
  //f_output.cd();
  auto t_end = high_resolution_clock::now();
  duration<double,std::milli> time_total_ms(t_end-t_begin);
@@ -315,10 +323,17 @@ int main(int argc, char** argv) {
  evCtr++;
   }// end loop over events
   f_output.cd();
- 
+  
+  double ratio;
+  cout<<counterpos<<' '<<counterneg<<endl;
+  ratio = counterpos/counterneg;
+  cout<<ratio<<endl;
+
+  
   //first passing threshold                                                         
-  //presample
+  //U plane
   c1.cd(1);
+  hFirstPreU.GetYaxis()->SetTitleOffset(2.4);
   hFirstPreU.Draw("hist ][");
   hFirstPreU.SetLineColor(kBlack);
   TLine line(-25,0,-25,18000);
@@ -339,7 +354,7 @@ int main(int argc, char** argv) {
   c1.cd();
   c1.Write();
 
-  //postsample
+  //V plane
   c2.cd(1);
   hFirstPreV.Draw("hist ][");
   hFirstPreV.SetLineColor(kBlack);
@@ -352,10 +367,10 @@ int main(int argc, char** argv) {
   c2.cd(2);
   hFirstPostV.Draw("hist ][");
   hFirstPostV.SetLineColor(kBlack);
-  TLine line2I(-15,0,-15,9200);
+  TLine line2I(-15,0,-15,11000);
   line2I.SetLineColor(kRed);
   line2I.Draw();
-  TLine line3I(15,0,15,9200);
+  TLine line3I(15,0,15,11000);
   line3I.SetLineColor(kRed);
   line3I.Draw();
   c2.cd(3);
@@ -370,7 +385,7 @@ int main(int argc, char** argv) {
   c2.cd();
   c2.Write();
 
-  //algorithm
+  //Y plane
   c3.cd(1);
   hFirstPreY.Draw("hist ][");
   hFirstPreY.SetLineColor(kBlack);
@@ -393,16 +408,16 @@ int main(int argc, char** argv) {
   //2D
   c4.cd(1);
   hFirstPre.Draw("colz");
-  TLine line5(0,-25,8256,-25);
+  TLine line5(0,-25,2400,-25);
   line5.SetLineColor(kRed);
   line5.Draw();
-  TLine line6(0,15,8256,15);
+  TLine line6(2400,15,4800,15);
   line6.SetLineColor(kRed);
   line6.Draw();
-  TLine line7(0,-15,8256,-15);
+  TLine line7(2400,-15,4800,-15);
   line7.SetLineColor(kRed);
   line7.Draw();
-  TLine line8(0,30,8256,30);
+  TLine line8(4800,30,8256,30);
   line8.SetLineColor(kRed);
   line8.Draw();
   c4.cd(2);
@@ -421,29 +436,29 @@ int main(int argc, char** argv) {
   c4.Write();
 
   //last sample passing threshold
-  //presample
+  //U plane
   c5.cd(1);
   hLastPreU.Draw("hist ][");
   hLastPreU.SetLineColor(kBlack);
-  //TLine line(-25,0,-25,18000);
-  line.SetLineColor(kRed);
-  line.Draw();
+  TLine line16(-25,0,-25,21000);
+  line16.SetLineColor(kRed);
+  line16.Draw();
   c5.cd(2);
   hLastPostU.Draw("hist ][");
   hLastPostU.SetLineColor(kBlack);
-  // TLine lineI(-25,0,-25,14000);
-  lineI.SetLineColor(kRed);
-  lineI.Draw();
+  TLine line6I(-25,0,-25,16000);
+  line6I.SetLineColor(kRed);
+  line6I.Draw();
   c5.cd(3);
   hLastAlgoU.Draw("hist ][");
   hLastAlgoU.SetLineColor(kBlack);
-  // TLine lineII(-25,0,-25,22000);
-  lineII.SetLineColor(kRed);
-  lineII.Draw();
+  TLine line6II(-25,0,-25,35000);
+  line6II.SetLineColor(kRed);
+  line6II.Draw();
   c5.cd();
   c5.Write();
 
-  //postsample                                                                                                                                              
+  //V plane                                                                                                  
   c6.cd(1);
   hLastPreV.Draw("hist ][");
   hLastPreV.SetLineColor(kBlack);
@@ -456,25 +471,25 @@ int main(int argc, char** argv) {
   c6.cd(2);
   hLastPostV.Draw("hist ][");
   hLastPostV.SetLineColor(kBlack);
-  //TLine line2I(-15,0,-15,9200);
-  line2I.SetLineColor(kRed);
-  line2I.Draw();
-  //TLine line3I(15,0,15,9200);
-  line3I.SetLineColor(kRed);
-  line3I.Draw();
+  TLine line12I(-15,0,-15,17000);
+  line12I.SetLineColor(kRed);
+  line12I.Draw();
+  TLine line13I(15,0,15,17000);
+  line13I.SetLineColor(kRed);
+  line13I.Draw();
   c6.cd(3);
   hLastAlgoV.Draw("hist ][");
   hLastAlgoV.SetLineColor(kBlack);
-  //TLine line2II(-15,0,-15,30000);
-  line2II.SetLineColor(kRed);
-  line2II.Draw();
-  //TLine line3II(15,0,15,30000);
-  line3II.SetLineColor(kRed);
-  line3II.Draw();
+  TLine line12II(-15,0,-15,34000);
+  line12II.SetLineColor(kRed);
+  line12II.Draw();
+  TLine line13II(15,0,15,34000);
+  line13II.SetLineColor(kRed);
+  line13II.Draw();
   c6.cd();
   c6.Write();
 
-  //algorithm                                                                                                                                               
+  //Y plane                                                                                                     
   c7.cd(1);
   hLastPreY.Draw("hist ][");
   hLastPreY.SetLineColor(kBlack);
@@ -494,7 +509,7 @@ int main(int argc, char** argv) {
   c7.cd();
   c7.Write();
 
-  //2D                                                                                                                                                      
+  //2D                                                                                                    
   c8.cd(1);
   hLastPre.Draw("colz");
   //TLine line5(0,-25,8256,-25);
@@ -523,6 +538,11 @@ int main(int argc, char** argv) {
   line8.Draw();
   c8.cd();
   c8.Write();
+
+  c10.cd();
+  hFirstNegV.Draw("hist ][");
+  c10.Print(".png");
+  
   //and ... write to file!                                                            
   f_output.Write();
   f_output.Close();
