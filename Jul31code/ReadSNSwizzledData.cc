@@ -82,14 +82,17 @@ int main(int argc, char** argv) {
 
   size_t _maxEvts = 100;
   size_t evCtr = 0;
-  //TCanvas *c1 = new TCanvas("c1","c1",900,700);
-  //TCanvas *c2 = new TCanvas("c2","c2",900,700);
-  // TCanvas *c3 = new TCanvas("c3","c3",900,700);
+	
+// canvas to draw histograns to
+ 
   TCanvas *c5 = new TCanvas("c5","c5",1000,600);
-  //TCanvas *c4 = new TCanvas("c4","c4",900,600);  
+  
+	
+// histogram that will plot 100 events together	
   TH2F* allevent = new TH2F("all","100 events; Channel; Tick",8256,0,8256,6400,0,6400); 
   allevent->GetXaxis()->SetRangeUser(0,8256);
   allevent->GetZaxis()->SetRangeUser(0,120000);
+  
   for (gallery::Event ev(filenames) ; !ev.atEnd(); ev.next()) {
     if(evCtr >= _maxEvts) break;
 
@@ -117,13 +120,12 @@ int main(int argc, char** argv) {
 
 
 
-    // Event display histogram
-  
+    // Event display histogram for one event in 3 planes U, V, Y
     //TCanvas *c4 = new TCanvas(Form("c4_%d_%d", run ,event),Form("c4_%d_%d", run ,event));
     //c4->Divide(1,3);
   
     //TH2S*  hTickWireu = new TH2S(Form("hTickWireu_run%d_event%d", run ,event), Form("Run %d event %d U; Channel; Tick", run ,event), 8256, 0, 2400, 6400, 0, 6400); 
-    //hTickWireu->GetZaxis()->SetRangeUser(1950,2150);
+    //hTickWireu->GetZaxis()->SetRangeUser(1950,2150); // z axis increases contrast to view energy deposit better
     //TH2S* hTickWirev = new TH2S(Form("hTickWirev_run%d_event%d", run ,event), Form("Run %d event %d V; Channel; Tick", run ,event), 8256, 2400, 4800, 6400, 0, 6400);
     //hTickWirev->GetZaxis()->SetRangeUser(1950,2150);
     //TH2S* hTickWirey = new TH2S(Form("hTickWirey_run%d_event%d", run ,event), Form("Run %d event %d Y; Channel; Tick", run ,event), 8256, 4800, 8256, 6400, 0, 6400);
@@ -154,7 +156,7 @@ int main(int argc, char** argv) {
       for( size_t tick = 0; tick < zeroPaddedWire.size(); tick++ ){
 	//to plot all events overlapped
 	allevent->Fill(channel, tick, zeroPaddedWire[tick]);
-	//if channel number -- to do
+	// fill each plane separately
 	//if (channel <= 2400)
 	//{hTickWireu->Fill(channel, tick, zeroPaddedWire[tick]);}
 	//else if (channel > 2400 && channel <= 4800)
