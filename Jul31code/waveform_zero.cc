@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
   //In a for loop, that looks like this:                                                                                 
 
 
-  // how many of the repeating bits do we see in the induction vs collection channels
+  // how many of the repeating samples do we see in the induction vs collection channels
   int uevents = 0;
   int vevents = 0;
   int yevents = 0;
@@ -142,7 +142,7 @@ int main(int argc, char** argv) {
             //cout<<"event:"<<event<<' '<<"channel:"<<channel<<' '<<firstTick<<" to "<<endTick<<' '<<ROI[firstTick+7]<<"-"<<ROI[endTick]<<"="<<firstpost<<"\n";
 	    if ( (endTick-firstTick)>17 ){
 	      vevents += 1;
-	      if (firstTick != 1600 && firstTick != 4800){hSecondLastV.Fill(secondlast);}}
+	      if (firstTick != 1600 && firstTick != 4800){hSecondLastV.Fill(secondlast);}} // not on the frame boundaries
 	    //Cout<<uevents<<' '<<vevents<<' '<<yevents<<endl;
 	    //	      c.Print(".png");
           }
