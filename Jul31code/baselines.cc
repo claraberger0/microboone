@@ -1,6 +1,6 @@
 
 //***************************                                                             
-//    analysis of SN readout waveforms                                                    
+//    analysis baseline estimations in each plane                                                  
 //    Clara Berger 6/20/18                                                                
 //***************************                                                             
 
@@ -67,26 +67,26 @@ int main(int argc, char** argv) {
   size_t evCtr = 0;
 
   // first sample passing the threshold                                             
-  TCanvas c1("c_U","c1",1100,400);
+  TCanvas c1("c_U","c1",1100,400); // u plane canvas
   c1.Divide(3,1);
   TCanvas c2("c_V","c2",1100,400);
   c2.Divide(3,1);
   TCanvas c3("c_Y","c3",1100,400);
   c3.Divide(3,1);
-  TCanvas c4("c_first","c4",600,900);
+  TCanvas c4("c_first","c4",600,900); // not divided into planes
   c4.Divide(1,3);
 
-  
+  //first passing sample - first presample
   TH1I hFirstPreU("hFirstPreu","First sample passing U threshold - first presample ADC; ADC; Frequency",400,-200,200);
   TH1I hFirstPreV("hFirstPrev","First sample passing V threshold - first presample ADC; ADC; Frequency",100,-50,50);
   TH1I hFirstPreY("hFirstPrey","First sample passing Y threshold - first presample ADC; ADC; Frequency",400,-200,200);
   TH2I hFirstPre("hFirstPre", "First sample passing threshold - first presample ADC; Channel; ADC", 8256, 0, 8256, 400, -200, 200);
-  
+  //first passing sample - last postsample
   TH1I hFirstPostU("hFirstPostu","First sample passing U threshold - last postsample ADC; ADC; Frequency",400,-200,200);
   TH1I hFirstPostV("hFirstPostv","First sample passing V threshold - last postsample ADC; ADC; Frequency",100,-50,50);
   TH1I hFirstPostY("hFirstPosty","First sample passing Y threshold - last postsample ADC; ADC; Frequency",400,-200,200);
   TH2I hFirstPost("hFirstPost","First sample passing threshold - last postsample ADC; Channel; ADC;", 8256, 0, 8256, 400,-200,200);
-
+// first passing sample - algorithm baseline
   TH1I hFirstAlgoU("hFirstAlgou","First sample passing U threshold - algorithm baseline ADC; ADC; Frequency",400,-200,200);
   TH1I hFirstAlgoV("hFirstAlgov","First sample passing V threshold - algorithm baseline ADC; ADC; Frequency",100,-50,50);
   TH1I hFirstAlgoY("hFirstAlgoy","First sample passing Y threshold - algorithm baseline ADC; ADC; Frequency",400,-200,200);
@@ -247,17 +247,17 @@ int main(int argc, char** argv) {
      const float intercept = prebaseline - slope*pretick;
 
     
-     //*******************************************end baseline algorightm*************************************************
+     //******************************************* end baseline algorightm*************************************************
      
      // first sample passing the threshold                                       
      double firstpre;
-     firstpre = ROI[firstTick+7]-ROI[firstTick];
+     firstpre = ROI[firstTick+7]-ROI[firstTick]; // 8th sample - 1st sample
      hFirstPre.Fill(channel,firstpre);
      if(channel <= 2400){
        hFirstPreU.Fill(firstpre);}
      else if(channel >2400 && channel <=4800){
        hFirstPreV.Fill(firstpre);
-       if (firstpre>=0){counterpos += 1;}
+       if (firstpre>=0){counterpos += 1;}   //positive peaks in the V plane
        if (firstpre<0){counterneg += 1;}}
      else
        {hFirstPreY.Fill(firstpre);}
@@ -265,14 +265,14 @@ int main(int argc, char** argv) {
      double firstpost;
      if(ROI[endTick]>1){
        firstpost = ROI[firstTick+7]-ROI[endTick];}
-     else 
-       {firstpost = ROI[firstTick+7]-ROI[endTick-1];}
+     else 					   
+       {firstpost = ROI[firstTick+7]-ROI[endTick-1];}  //if the last sample seems to be 0 or very small use the second to last sample    
      hFirstPost.Fill(channel,firstpost);
      if(channel <= 2400){
        hFirstPostU.Fill(firstpost);}
      else if(channel >2400 && channel <=4800){
        hFirstPostV.Fill(firstpost);
-       if(firstpost<0){hFirstNegV.Fill(channel);}
+       if(firstpost<0){hFirstNegV.Fill(channel);}  // look at channels with negative V plane triggers
 	 //cout<<"event:"<<event<<' '<<"channel:"<<channel<<' '<<firstTick<<' '<<endTick<<' '<<ROI[firstTick+7]<<"-"<<ROI[endTick]<<"="<<firstpost<<"\n";}
      }
      else
@@ -281,7 +281,7 @@ int main(int argc, char** argv) {
 	   //  cout<<"event:"<<event<<' '<<"channel:"<<channel<<' '<<firstTick<<' '<<endTick<<' '<<ROI[firstTick+7]<<"-"<<ROI[endTick]<<"="<<firstpost<<"\n";}
        }
      double firstalgo;
-     firstalgo = ROI[firstTick+7]-(slope*(firstTick+7)+intercept);
+     firstalgo = ROI[firstTick+7]-(slope*(firstTick+7)+intercept); // use slope and intercept to solve for baseline under the 8th sample
      hFirstAlgo.Fill(channel,firstalgo);
      if(channel <= 2400){
        hFirstAlgoU.Fill(firstalgo);}
@@ -344,11 +344,11 @@ int main(int argc, char** argv) {
   //first passing threshold********************************************************************************                   
   //U plane
   c1.cd(1);
-  hFirstPreU.GetYaxis()->SetTitleOffset(2);
-  hFirstPreU.Fit("gaus","","",-43,-20);
+  hFirstPreU.GetYaxis()->SetTitleOffset(2);  // slightly move axis label
+  hFirstPreU.Fit("gaus","","",-43,-20);  // fit gaussian on the range -43, -20
   gStyle->SetOptFit(1);
   hFirstPreU.SetLineColor(kBlack);
-  TLine line(-25,0,-25,18000);
+  TLine line(-25,0,-25,18000);     // draw vertical line at the threshold in U plane
   line.SetLineColor(kRed);
   line.Draw();
   c1.cd(2);
