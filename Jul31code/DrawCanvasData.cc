@@ -1,6 +1,6 @@
-********************************
+//********************************
 // plot event display after display to look through with more convenience 
-*********************************
+//*********************************
 
 
 //some standard C++ includes          (from ReadSNSwizzledData.cc)                                                                                           
