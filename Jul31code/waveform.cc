@@ -105,22 +105,24 @@ int main(int argc, char** argv) {
 	const int firstTick = ROI.begin_index();
 	const size_t endTick = ROI.end_index();
        
-
+	// ****************** to look at a general waveform in an event *******************
 	//	TH1D horig("roi_original", "roi_original;Tick;ADC", endTick + 1 - firstTick, firstTick, endTick + 1);
 	//horig.SetLineColor(kBlack);
      
-
 	//for (size_t iTick = ROI.begin_index(); iTick <= ROI.end_index(); iTick++ ){  
 	//horig.Fill((int)iTick,ROI[iTick]);}
+	//***********************************************************************************
 	
+	      
+	// look at the waveforms in the V plane where the trigger is on the +15 vs. -15 threshold
 	double firstpost;
 	if(ROI[endTick]>1){   // not counting when the last tick is 0 or very small                                        
           firstpost = ROI[firstTick+7]-ROI[endTick];
 	  TH1D horig("roi_original", "roi_original;Tick;ADC", endTick + 1 - firstTick, firstTick, endTick + 1);
 	  horig.SetLineColor(kBlack);
           for (size_t iTick = ROI.begin_index(); iTick <= ROI.end_index(); iTick++ ){  //fill up to endTick                
-	    horig.Fill((int)iTick,ROI[iTick]);}
-	  if (channel >3400 && channel <=3420 && firstpost<0){
+	    horig.Fill((int)iTick,ROI[iTick]);} 
+	  if (channel >3400 && channel <=3420 && firstpost<0){   // firstpost<0 means negative trigger
 	    TCanvas c(Form("c_%d_%d_V_neg",channel,firstTick),Form("c%d_Y",channel),900,500);
 	    horig.Draw("hist ]");
 	    c.Modified();
@@ -139,7 +141,7 @@ int main(int argc, char** argv) {
 	}
 
         else                                                                                                              
-          {firstpost = ROI[firstTick+7]-ROI[endTick-1];
+          {firstpost = ROI[firstTick+7]-ROI[endTick-1]; //take second to last value if last one seems wring
 	   TH1D horig("roi_original", "roi_original;Tick;ADC", endTick  - firstTick, firstTick, endTick);
 	   horig.SetLineColor(kBlack);
 	  for (size_t iTick = ROI.begin_index(); iTick < ROI.end_index(); iTick++ ){  // fill up to endTick-1            
@@ -163,7 +165,7 @@ int main(int argc, char** argv) {
 	  }
 	
 
-	// checking the waveforms in the y plane where the lsat sample is >1500 --> check if its just flipped bits
+	// checking the waveforms in the y plane where the last sample is >1500 --> check if its just flipped bits
 	double lastsample;
 	lastsample = ROI[endTick];
 	if(channel > 4800 && lastsample>1500){   //all channels in Y plane 
@@ -202,73 +204,6 @@ int main(int argc, char** argv) {
           c3.Update();
           c3.Print(".png");
 	}
-	// first sample passing the threshold - last post sample when  the difference is negative in the V plane    	
-	//if (channel >3400 && channel <=3420 && firstpost<0){
-	// TCanvas c(Form("c_%d_%d_V_neg",channel,firstTick),Form("c%d_Y",channel),900,500);
-	//horig.Draw("hist ]");
-	//c.Modified();
-	//c.Update();
-	//cout<<"event:"<<event<<' '<<"channel:"<<channel<<' '<<firstTick<<" to "<<endTick<<' '<<ROI[firstTick+7]<<"-"<<ROI[endTick]<<"="<<firstpost<<"\n";
-	//c.Print(".png");
-	//}	
-	//if (channel >3400 && channel <=3410 && firstpost>0){
-	//TCanvas c(Form("c_%d_%d_V_pos",channel,firstTick),Form("c%d_Y",channel),900,500);
-	//horig.Draw("hist ]");
-	// c.Modified();
-	//c.Update();
-	//cout<<"event:"<<event<<' '<<"channel:"<<channel<<' '<<firstTick<<" to "<<endTick<<' '<<ROI[firstTick+7]<<"-"<<ROI[endTick]<<"="<<firstpost<<"\n";
-	//c.Print(".png");
-        //}
-
-	// look at waveforms where the difference between the first passing sample and the last post sample is 0
-	//double firstpost; //fist sample passing threshold - the last post sample 
-	//if(ROI[endTick]>1){   // not counting when the last tick is 0 or very small
-	  //firstpost = ROI[firstTick+7]-ROI[endTick];
-	  //for (size_t iTick = ROI.begin_index(); iTick <= ROI.end_index(); iTick++ ){  //fill up to endTick
-	    //  horig.Fill((int)iTick,ROI[iTick]);}}
-	//else
-	  //{firstpost = ROI[firstTick+7]-ROI[endTick-1];
-	    //for (size_t iTick = ROI.begin_index(); iTick < ROI.end_index(); iTick++ ){  // fill up to endTick-1 
-	      //    horig.Fill((int)iTick,ROI[iTick]);}}
-      	
-	//if(firstpost<1 && firstpost>=0){    // when this differece is 0,
-	//  cout<<"event:"<<event<<' '<<"channel:"<<channel<<' '<<firstTick<<' to  '<<endTick<<' '<<ROI[firstTick+7]<<"-"<<ROI[endTick]<<"="<<firstpost<<"\n";
-	// TCanvas c(Form("c_%d_%d_Y",channel,firstTick),Form("c%d_Y",channel),900,500);                             
-	// horig.Draw("hist ]");
-	// c.Modified();
-	// c.Update();
-	// c.Print(".png"); // print that waveform
-	//}
-
-
-
-	//        if ( channel >= 1010 && channel <= 1020)// just a random sample of U plane to look at
-	//{ TCanvas c(Form("c_%d_U",channel),Form("c%d_U",channel),900,500);
-	// horig.Draw("hist ][");
-	//c.Modified();
-	//c.Update();
-	//f_output.cd();
-	//c.Write();
-	  //	  cout<<ROI[endTick]<<' '<< channel <<'\n';
-	//}
-        //else if (channel >=3400 && channel<=3410){
-	//TCanvas c(Form("c_%d_V",channel),Form("c%d_V",channel),900,500);
-	// horig.Draw("hist ][");
-	//c.Modified();
-	//c.Update();
-	//f_output.cd();
-	//c.Write();
-	 //cout<<ROI[endTick]<<' '<<channel<<'\n';
-	//}
-	//else if (channel >= 6800 && channel <= 6810)
-	   //{ TCanvas c(Form("c_%d_Y",channel),Form("c%d_Y",channel),900,500);
-	//horig.Draw("hist ]");
-	//c.Modified();
-	//c.Update();
-	//f_output.cd();
-	//c.Write();
-	  //cout<<ROI[endTick]<<' '<<channel<<'\n';
-	//}
 	
       }
     }
