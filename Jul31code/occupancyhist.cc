@@ -109,33 +109,6 @@ int main(int argc, char** argv) {
     
     
 
-    //We can use a range-based for loop for ease.
-    //for( auto const& wire : wire_vec){
-      //cout << "\nwire.Signal().size() " << wire.Signal().size();
-      //cout << "\nwire.NSignal() " << wire.NSignal();
-      //cout << "\nwire.View() " << wire.View();
-      // int channel = wire.Channel();
-      //cout << "\nwire.Channel() " << channel  << endl;
-      // test SignalROI()
-      // Loop over the zero-padded vector
-      
-      
-      //auto const numhits = wire_vec[i].SignalROI().n_ranges();
-      //wirehits[i]= numhits;
-      //totalhits[i]=totalhits[i]+wirehits[i];
-    
-
-      //std::vector<float> zeroPaddedWire = wire.Signal();
-      //auto const numhits = wire.SignalROI().n_ranges();
-      //cout<<zeroPaddedWire.size();
-      
-      //for( size_t tick = 0; tick < zeroPaddedWire.size(); tick++ ){
-      //cout << tick << ' ' << zeroPaddedWire[tick]<< '\n'; }
-      //}
-	
-       
-      // }
-
     auto t_end = high_resolution_clock::now();
     duration<double,std::milli> time_total_ms(t_end-t_begin);
     cout << "\tEvent took " << time_total_ms.count() << " ms to process." << endl;
