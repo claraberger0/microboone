@@ -74,7 +74,6 @@ int main(int argc, char** argv) {
   TH2F hIntNot("hIntNot", "ROI Integral No Flipped Bit; Channel; ROI integral (ADC)", 8256, 0, 8256, 8000, 0, 8000);
   TCanvas c8("flippedint","c8",900,600);
   
-
   TCanvas c4("notflippedint_decon","c4",900,600);
   TH2F hIntFlipped_d("hIntFlipped_decon", "Deconvoluted ROI Integral with Flipped Bit; Channel; ROI integral (ADC)", 8256, 0, 8256, 4000, 0, 4000);
   TH2F hIntNot_d("hIntNot_decon", " Deconvoluted ROI Integral No Flipped Bit; Channel; ROI integral (ADC)", 8256, 0, 8256, 4000, 0, 4000);
@@ -236,8 +235,8 @@ int main(int argc, char** argv) {
 	    double absvalue;
 	    absvalue = abs(ROI[iTick]-(slope*(iTick)+intercept));  // subtract the algorithm baseline and then take the absolue value
 	    horig.Fill((int)iTick,absvalue);}                    // fill that hist with the waveform              
-	  integral = horig.Integral();                                            // take the integral of that waveform              
-	  hIntNot.Fill(channel,integral); // fill the histogram of no flipped bits integrals
+	  integral = horig.Integral();                                         // take the integral of that waveform              
+	  hIntNot.Fill(channel,integral);       // fill the histogram of no flipped bits integrals
 	  TCanvas c1(Form("c1_%d_%d",event,channel),"c1",900,600);
 	  horig.Draw("hist ]");
 	  // c1.Print(".png");
@@ -262,7 +261,8 @@ int main(int argc, char** argv) {
 	
 	  hIntLen.Fill(roilength,integral);  
 	}
-
+	
+	// deconvoluted data
 	auto zsROIs_d = wire_vec_d[i].SignalROI();
 	int channel_d = wire_vec_d[i].Channel();
 
