@@ -1,4 +1,9 @@
-//some standard C++ includes                                                                                                  
+********************************
+// plot event display after display to look through with more convenience 
+*********************************
+
+
+//some standard C++ includes          (from ReadSNSwizzledData.cc)                                                                                           
 #include <iostream>
 #include <stdlib.h>
 #include <string>
@@ -25,7 +30,7 @@ using namespace std;
 
 using namespace std::chrono;
 
-
+// define a control that shows "press enter to continue" after each iteration and then takes an enter input
 void PressEnterToContinue()
 {
   cout << "Press Enter to continue" << flush ;
@@ -38,15 +43,15 @@ TCanvas* obj;
 void  DrawCanvasData()
 {
   gStyle->SetPalette(55);
-  TFile *F1 = TFile::Open("ReadSNSwizzledData_output_500.root");
+  TFile *F1 = TFile::Open("ReadSNSwizzledData_output_500.root");  // specifically uses output data from 500 events in run 14662
   
   TIter next(F1->GetListOfKeys());
   TKey *key;
   while ((key = (TKey*)next()))
     {
       obj  =(TCanvas*) F1->Get(key->GetName());
-      obj->Draw();
-      gPad->WaitPrimitive();
-      PressEnterToContinue();
+      obj->Draw();               // draw the event display 
+      gPad->WaitPrimitive();     // pause to look at the event display
+      PressEnterToContinue();    // go to the next one
     }
 }
