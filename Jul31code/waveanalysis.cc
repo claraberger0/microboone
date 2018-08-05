@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
   size_t evCtr = 0;
  
 
-  //histograms in 3 plans for first-last plots    
+  //histograms in 3 planes for first sample -last sample   
   TCanvas c1("c1","c1",900,400);
   c1.Divide(3,1);
   TH1I hDiffFirstLastSampleU("hDiffFirstLastSampleu", "First - last ADC U; First - last (ADC); Frequency", 8192, -4096, 4096);
@@ -148,8 +148,8 @@ int main(int argc, char** argv) {
     auto const& wire_vec(*wire_handle);
 
     //cout << "\tThere are " << wire_vec.size() << " Wires in this event." << endl;
-    // Event display histogram
-
+	  
+    // difference to interpolation in 3 planes
     TH1I hInterpolU(Form("hinterpolu_event%d",event),Form("Event %d Difference to interpolation U; ADC_{i} - (ADC_{i+1} + ADC_{i-1})/2 (ADC); Frequency",event), 3200, 0, 3200);//changed from 4096 to zoom in
     TH1I hInterpolV(Form("hinterpolv_event%d",event),Form("Event %d Difference to interpolation V; ADC_{i} - (ADC_{i+1} + ADC_{i-1})/2 (ADC); Frequency",event ), 3200, 0, 3200);
     TH1I hInterpolY(Form("hinterpoly_event%d",event),Form("Event %d Difference to interpolation Y; ADC_{i} - (ADC_{i+1} + ADC_{i-1})/2 (ADC); Frequency",event), 3200, 0, 3200);
@@ -259,7 +259,7 @@ int main(int argc, char** argv) {
 
       } //end loop over ROI  
       
-      hLengthFrame.Fill(channel,(lengthperframe/6400));//divide by 6400 the length of the event
+      hLengthFrame.Fill(channel,(lengthperframe/6400)); //divide by 6400 the length of the event to get the ratio ROI length / frame /total event length
  
    }//end loop over wires
 
